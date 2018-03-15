@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Markov Chains</title>
+	<h1 class=nodetext>Sales Attribution with Markov Chains</h1>  
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    <link href="./style.css" type="text/css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="./vector.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.6/angular.min.js"></script>
+<style>
+body {
+  background-color: #222;
+  color: white;
+}
+
+.st-diagram {
+  pointer-events: none;
+  position: absolute;
+  left: 0;
+  width: 100%;
+  z-index: 1;
+}
+.st-diagram .nodes {
+  pointer-events: all;
+</style>
+</head>
+<body ng-app="myApp" ng-controller="MainCtrl">
+  <st-diagram center="diagramCenter" states="states"
+    transition-matrix="transitionMatrix" duration="duration"
+    selected-transition="selectedTransition"></st-diagram>
+	<a class="remove" href="./branch_removed.html">Remove Branch</a>
+	<a class="remove" href="./callcentre_removed.html">Remove Call Centre</a>
+	<a class="remove" href="./outbound_removed.html">Remove Outbound Call</a>
+	<!-- </div> -->
+<!--   <div class="matrixInput">
+    <textarea ng-class="{ 'valid' : validTransitionMatrix }"
+      ng-model="transitionMatrixJSON">{{transitionMatrix | json}}</textarea>
+  </div> -->
+  <h2 id = "saleCount" class=nodetext>Sale: 0 </h2>
+  <h2 id = "nonSaleCount" class=nodetext>No Sale: 0 </h2>
+  <div class="controls">
+    <input class="speedRange" type="range" ng-model="speedRange" min="1" max="5000" step="1"/>
+    <label>Transition Speed</label>
+  </div>
+  <div class="fixed">A Visualisation by Tom Skehin. Thanks to <a href="http://setosa.io/blog/2014/07/26/markov-chains/">Victor Powell</a> for the d3.js scripts</div>
+</body>
+
+
+<script>
+
+var nodes = ["Start", "Branch", "Call Centre", "ATM", "Online Banking", "Mobile App", "Tablet App", "Ad Words", "Television", "Website", "Newspaper", "Push Notification", "Email", "Letter", "Outbound Call", "Social Media", "Affiliate Marketing", "Sale", "No Sale"];
+
+var myApp = angular.module('myApp', []);
+
+myApp.controller('MainCtrl', function($scope, utils, $window) {
+  angular.element($window).on('resize', function() { $scope.$apply(); });
+  
+  $scope.diagramCenter = [0.5, 0.5];
+  
+  $scope.isSelectedTransition = function(i, j) {
+    return !!$scope.selectedTransition;
+    if (!$scope.selectedTransition) return false;
+    return $scope.selectedTransition[0] === i
+      && $scope.selectedTransition[1] === j;
+  };
+  
+  $scope.speedRange = 2;
+  
+  $scope.$watch('speedRange', function(speed) {
+    $scope.duration = 2000 / +speed;
+  });
+  
+  $scope.updateTransitionMatrix = function(matrix) {
+    var prev = $scope.transitionMatrix;
+    $scope.transitionMatrix = matrix;
+    if(!$scope.states || matrix.length !== prev.length) {
+      $scope.states = matrix.map(function(d, i) {
+        return { label: nodes[i], index: i };
+      });
+    }
+    utils.setHash({ tm: matrix });
+  };
+  
+  var hash = utils.getHash();
+  if(hash && hash.tm) $scope.updateTransitionMatrix(hash.tm);
+  else $scope.updateTransitionMatrix([
+	[0,0.06,0.01,0.1,0.05,0.01,0,0.01,0.05,0,0,0.04,0,0.01,0.56,0.01,0.09,0],	// Start
+	[0,0.19,0.01,0.29,0.04,0,0.03,0.01,0.02,0,0.01,0.2,0.01,0,0.16,0,0.030,0],	// 
+	[0,0.07,0.19,0.09,0.02,0,0,0.01,0.04,0,0,0.02,0,0,0.43,0.02,0.11,0],	// 
+	[0,0.11,0,0.23,0.06,0,0.01,0.01,0.03,0,0,0.29,0,0,0.19,0,0.07,0],	// 
+	[0,0.01,0,0.03,0.85,0,0,0.03,0,0,0,0.02,0,0,0.06,0,0.0,0],	// 
+	[0,0.07,0.03,0.08,0.02,0.19,0.08,0.01,0.03,0.01,0.03,0.01,0.02,0,0.37,0.01,0.040,0],	// 
+	[0,0.15,0.02,0.21,0.03,0.02,0,0.04,0.02,0,0.03,0.11,0,0,0.27,0,0.10,0],	// 
+	[0,0.03,0.02,0.09,0.15,0,0.01,0.01,0.09,0,0.01,0.06,0,0,0.45,0.01,0.070,0],	// 
+	[0,0.03,0.01,0.05,0.01,0,0,0.02,0.06,0.01,0,0.02,0.01,0,0.74,0,0.040,0],	// 
+	[0,0,0.01,0.08,0.02,0,0,0.05,0.07,0.03,0,0.03,0,0.01,0.64,0,0.060,0],	// 
+	[0,0.03,0.01,0.07,0.04,0.02,0.09,0.03,0.03,0,0.22,0.12,0.04,0,0.2,0.07,0.030,0],	// 
+	[0,0.15,0,0.36,0.03,0,0.01,0.01,0.01,0,0.01,0.34,0,0,0.04,0.02,0.020,0],	// 
+	[0,0.08,0.01,0.17,0.07,0,0,0.09,0.05,0,0,0.03,0.07,0,0.21,0,0.220,0],	//
+	[0,0.05,0.01,0.1,0.01,0,0,0.02,0.09,0.32,0,0.01,0,0.08,0.25,0,0.06,0],	// 
+	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],	// 
+	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],	// 
+	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],	// 
+	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],	// Sale
+  ]);
+
+  $scope.transitionMatrixJSON = JSON.stringify($scope.transitionMatrix)
+    .replace(/\],/gm, '],\n');
+  
+  $scope.$watch('transitionMatrixJSON', function(str) {
+    var valid = false;
+    try{ 
+      var matrix = JSON.parse(str);
+      valid = matrix[0].length === matrix.length;
+      var sum = matrix.reduce(function(c, row) {
+        return c + row.reduce(function(p, c){ return p + c; }, 0);
+      }, 0);
+      var r = sum / matrix.length;
+      valid = valid && r < (1 + 1e-9) && r > (1 - 1e-9);
+      if (valid) {
+        $scope.updateTransitionMatrix(matrix);
+      }
+    }catch(e) {}
+    $scope.validTransitionMatrix = valid;
+  });
+});
+</script>
+<script src="common.js" charset="utf-8"></script>
+</html>

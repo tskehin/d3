@@ -1,0 +1,58 @@
+.axis path,
+.axis line {
+    fill: none;
+    stroke: black;
+    shape-rendering: crispEdges;
+}
+
+.axis text {
+    font-family: sans-serif;
+    font-size: 10px;
+}
+
+.line {
+  fill: none;
+  stroke: #D2B4DE;
+  stroke-width: 1.5px;
+}
+
+.overlay {
+  fill: none;
+  fill-opacity: 0.0;
+  pointer-events: all;
+}
+
+.focus circle {
+  fill: #4A235A;
+  stroke: #4A235A;
+}
+
+.bar{
+  fill: #D2B4DE;
+}
+
+.bar:hover{
+  fill: #4A235A;
+}
+
+.axislabel{
+  font-family: "Verdana", Courier, monospace;
+  font-size: 14px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.focus text{
+  font-family: "Verdana", Courier, monospace;
+  font-size: 14px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 400;
+  }
+
+h1{
+  font-family: "Verdana", Courier, monospace;
+  font-size: 20px;
+}
